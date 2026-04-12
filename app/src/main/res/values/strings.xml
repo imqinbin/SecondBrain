@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">SecondBrain</string>
+    <string name="accessibility_service_description">SecondBrain 语音备忘录服务：同时按下音量上+音量下键开始/停止录音，自动识别语音并创建备忘录。</string>
 </resources>
