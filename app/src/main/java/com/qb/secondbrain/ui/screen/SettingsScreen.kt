@@ -1,5 +1,10 @@
 package com.qb.secondbrain.ui.screen
 
+import android.accessibilityservice.AccessibilityServiceInfo
+import android.content.Context
+import android.content.Intent
+import android.provider.Settings
+import android.view.accessibility.AccessibilityManager
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -31,6 +36,7 @@ import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -41,10 +47,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.qb.secondbrain.ui.viewmodel.SettingsViewModel
 
@@ -58,6 +67,29 @@ fun SettingsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+
+    // Accessibility service state
+    var isAccessibilityEnabled by remember { mutableStateOf(false) }
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    fun checkAccessibilityEnabled(): Boolean {
+        val am = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
+        val enabled = am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK)
+            .any { it.resolveInfo.serviceInfo.packageName == context.packageName }
+        return enabled
+    }
+
+    // Refresh state when returning from system settings
+    androidx.compose.runtime.DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                isAccessibilityEnabled = checkAccessibilityEnabled()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        isAccessibilityEnabled = checkAccessibilityEnabled()
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
 
     // Local edit state for text fields
     var editApiUrl by remember(uiState.llmApiUrl) { mutableStateOf(uiState.llmApiUrl) }
@@ -85,6 +117,76 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
+            // Accessibility service section
+            Text(
+                text = "快捷录音",
+                style = MaterialTheme.typography.titleMedium
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        if (!isAccessibilityEnabled) {
+                            try {
+                                val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
+                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                }
+                                context.startActivity(intent)
+                            } catch (e: Exception) {
+                                Toast.makeText(context, "无法打开无障碍设置", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    },
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "无障碍服务（音量键录音）",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = if (isAccessibilityEnabled) "已开启：同时按音量上+下键录音"
+                            else "未开启，点击前往系统设置开启",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = if (isAccessibilityEnabled)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.error
+                        )
+                    }
+                    Switch(
+                        checked = isAccessibilityEnabled,
+                        onCheckedChange = {
+                            if (!isAccessibilityEnabled) {
+                                try {
+                                    val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
+                                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                    }
+                                    context.startActivity(intent)
+                                } catch (e: Exception) {
+                                    Toast.makeText(context, "无法打开无障碍设置", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        }
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+            HorizontalDivider()
+            Spacer(modifier = Modifier.height(16.dp))
+
             // ASR Engine section
             Text(
                 text = "语音识别",
