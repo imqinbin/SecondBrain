@@ -3,6 +3,7 @@ package com.qb.secondbrain.context
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Rect
 import android.view.accessibility.AccessibilityNodeInfo
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -37,8 +38,10 @@ class ScreenCaptureProvider @Inject constructor(
             val fileName = "screenshot_$timestamp.jpg"
             val outputFile = File(screenshotDir, fileName)
 
-            val width = rootNode.bounds.width().coerceAtLeast(1)
-            val height = rootNode.bounds.height().coerceAtLeast(1)
+            val bounds = Rect()
+            rootNode.getBoundsInScreen(bounds)
+            val width = bounds.width().coerceAtLeast(1)
+            val height = bounds.height().coerceAtLeast(1)
 
             val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
@@ -59,17 +62,16 @@ class ScreenCaptureProvider @Inject constructor(
 
     private fun drawNodeToCanvas(node: AccessibilityNodeInfo, canvas: Canvas) {
         if (node.isVisibleToUser) {
-            node.bounds?.let { bounds ->
-                // Draw a simple representation of the node's text content
-                val text = node.text?.toString() ?: node.contentDescription?.toString()
-                if (!text.isNullOrEmpty()) {
-                    val paint = android.graphics.Paint().apply {
-                        color = android.graphics.Color.BLACK
-                        textSize = 24f
-                        isAntiAlias = true
-                    }
-                    canvas.drawText(text, bounds.left.toFloat() + 8f, bounds.top.toFloat() + 24f, paint)
+            val nodeBounds = Rect()
+            node.getBoundsInScreen(nodeBounds)
+            val text = node.text?.toString() ?: node.contentDescription?.toString()
+            if (!text.isNullOrEmpty()) {
+                val paint = android.graphics.Paint().apply {
+                    color = android.graphics.Color.BLACK
+                    textSize = 24f
+                    isAntiAlias = true
                 }
+                canvas.drawText(text, nodeBounds.left.toFloat() + 8f, nodeBounds.top.toFloat() + 24f, paint)
             }
         }
 

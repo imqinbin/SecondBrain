@@ -47,7 +47,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
-import androidx.compose.material3.TimePickerDialog
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
@@ -76,7 +75,7 @@ import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun MemoEditScreen(
     memoId: Long?,
@@ -153,7 +152,7 @@ fun MemoEditScreen(
             initialMinute = pendingReminderDate?.get(Calendar.MINUTE) ?: 0,
             is24Hour = true
         )
-        TimePickerDialog(
+        AlertDialog(
             onDismissRequest = { showTimePicker = false },
             confirmButton = {
                 TextButton(onClick = {
@@ -172,10 +171,11 @@ fun MemoEditScreen(
                 TextButton(onClick = { showTimePicker = false }) {
                     Text("取消")
                 }
+            },
+            text = {
+                TimePicker(state = timePickerState)
             }
-        ) {
-            TimePicker(state = timePickerState)
-        }
+        )
     }
 
     Scaffold(
@@ -241,7 +241,8 @@ fun MemoEditScreen(
                     style = MaterialTheme.typography.titleSmall
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                if (uiState.address != null) {
+                val addressValue = uiState.address
+                if (addressValue != null) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(
@@ -264,7 +265,7 @@ fun MemoEditScreen(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
-                                    text = uiState.address,
+                                    text = addressValue,
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             }
@@ -408,7 +409,8 @@ fun MemoEditScreen(
                 }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     OutlinedTextField(
                         value = uiState.tagInput,
@@ -433,7 +435,8 @@ fun MemoEditScreen(
                     style = MaterialTheme.typography.titleSmall
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                if (uiState.reminderTime != null) {
+                val reminderTimeValue = uiState.reminderTime
+                if (reminderTimeValue != null) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         colors = CardDefaults.cardColors(
@@ -451,7 +454,7 @@ fun MemoEditScreen(
                                 text = SimpleDateFormat(
                                     "yyyy/MM/dd HH:mm",
                                     Locale.getDefault()
-                                ).format(Date(uiState.reminderTime)),
+                                ).format(Date(reminderTimeValue)),
                                 style = MaterialTheme.typography.bodyMedium
                             )
                             TextButton(onClick = { viewModel.updateReminderTime(null) }) {

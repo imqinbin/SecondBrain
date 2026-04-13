@@ -134,7 +134,7 @@ class AudioRecorder(
             raf.write(shortToLittleEndian(1))             // channels: mono
             raf.write(intToLittleEndian(sampleRate))      // sample rate
             raf.write(intToLittleEndian(sampleRate * BYTES_PER_SAMPLE)) // byte rate
-            raf.write(shortToLittleEndian(BYTES_PER_SAMPLE))            // block align
+            raf.write(shortToLittleEndian(BYTES_PER_SAMPLE.toShort()))  // block align
             raf.write(shortToLittleEndian(16))            // bits per sample
 
             // data sub-chunk

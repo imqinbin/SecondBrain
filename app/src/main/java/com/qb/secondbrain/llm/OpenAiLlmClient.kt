@@ -3,11 +3,12 @@ package com.qb.secondbrain.llm
 import com.google.gson.Gson
 import com.qb.secondbrain.data.model.LlmIntent
 import javax.inject.Inject
+import javax.inject.Named
 
 class OpenAiLlmClient @Inject constructor(
     private val openAiApi: OpenAiApi,
     private val gson: Gson,
-    private val modelName: String
+    @Named("modelName") private val modelName: String
 ) : LlmClient {
 
     companion object {

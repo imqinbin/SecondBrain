@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.view.KeyEvent
 import android.view.accessibility.AccessibilityEvent
+import android.graphics.Rect
 import android.view.accessibility.AccessibilityNodeInfo
 
 class VolumeKeyAccessibilityService : AccessibilityService() {
@@ -87,8 +88,10 @@ class VolumeKeyAccessibilityService : AccessibilityService() {
     private fun captureScreenshot() {
         try {
             val rootNode = rootInActiveWindow ?: return
-            val width = rootNode.bounds.width()
-            val height = rootNode.bounds.height()
+            val bounds = Rect()
+            rootNode.getBoundsInScreen(bounds)
+            val width = bounds.width()
+            val height = bounds.height()
             if (width <= 0 || height <= 0) return
 
             val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)

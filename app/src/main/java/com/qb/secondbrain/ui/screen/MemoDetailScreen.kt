@@ -82,7 +82,7 @@ private fun formatFullTime(timestamp: Long): String {
     ).format(java.util.Date(timestamp))
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun MemoDetailScreen(
     memoId: Long,
