@@ -19,14 +19,15 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideMemoDatabase(
-        @ApplicationContext context: Context
+        @ApplicationContext context: Context,
+        converters: Converters
     ): MemoDatabase {
         return Room.databaseBuilder(
             context,
             MemoDatabase::class.java,
             "secondbrain_db"
         )
-            .addTypeConverter(Converters())
+            .addTypeConverter(converters)
             .build()
     }
 

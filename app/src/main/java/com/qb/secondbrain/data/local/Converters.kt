@@ -1,11 +1,14 @@
 package com.qb.secondbrain.data.local
 
+import androidx.room.ProvidedTypeConverter
 import androidx.room.TypeConverter
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.qb.secondbrain.data.model.ImagePath
+import javax.inject.Inject
 
-class Converters {
+@ProvidedTypeConverter
+class Converters @Inject constructor() {
 
     private val gson = Gson()
 
