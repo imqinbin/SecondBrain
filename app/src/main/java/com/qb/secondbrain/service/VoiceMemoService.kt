@@ -48,6 +48,7 @@ class VoiceMemoService : Service() {
     companion object {
         const val ACTION_START_RECORDING = "com.qb.secondbrain.ACTION_START_RECORDING"
         const val ACTION_STOP_RECORDING = "com.qb.secondbrain.ACTION_STOP_RECORDING"
+        const val ACTION_TOGGLE_RECORDING = "com.qb.secondbrain.ACTION_TOGGLE_RECORDING"
         const val NOTIFICATION_ID = 1001
 
         @JvmStatic
@@ -73,6 +74,13 @@ class VoiceMemoService : Service() {
         when (intent?.action) {
             ACTION_START_RECORDING -> handleStartRecording()
             ACTION_STOP_RECORDING -> handleStopRecording()
+            ACTION_TOGGLE_RECORDING -> {
+                if (currentState is VoiceMemoState.Recording) {
+                    handleStopRecording()
+                } else {
+                    handleStartRecording()
+                }
+            }
         }
         return START_NOT_STICKY
     }
