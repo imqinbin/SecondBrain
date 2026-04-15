@@ -1,10 +1,8 @@
 package com.qb.secondbrain.ui.screen
 
-import android.accessibilityservice.AccessibilityServiceInfo
 import android.content.Context
 import android.content.Intent
 import android.provider.Settings
-import android.view.accessibility.AccessibilityManager
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -73,10 +71,12 @@ fun SettingsScreen(
     val lifecycleOwner = LocalLifecycleOwner.current
 
     fun checkAccessibilityEnabled(): Boolean {
-        val am = context.getSystemService(Context.ACCESSIBILITY_SERVICE) as AccessibilityManager
-        val enabled = am.getEnabledAccessibilityServiceList(AccessibilityServiceInfo.FEEDBACK_ALL_MASK)
-            .any { it.resolveInfo.serviceInfo.packageName == context.packageName }
-        return enabled
+        val enabledServices = Settings.Secure.getString(
+            context.contentResolver,
+            Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+        ) ?: return false
+        val serviceName = "${context.packageName}/${context.packageName}.service.VolumeKeyAccessibilityService"
+        return enabledServices.contains(serviceName)
     }
 
     // Refresh state when returning from system settings
