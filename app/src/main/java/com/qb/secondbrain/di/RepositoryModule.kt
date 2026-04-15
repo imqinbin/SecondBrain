@@ -1,7 +1,7 @@
 package com.qb.secondbrain.di
 
 import com.qb.secondbrain.asr.AsrEngine
-import com.qb.secondbrain.asr.StubAsrEngine
+import com.qb.secondbrain.asr.XfyunAsrEngine
 import com.qb.secondbrain.data.repository.LocalMemoRepository
 import com.qb.secondbrain.data.repository.MemoRepository
 import com.qb.secondbrain.llm.LlmClient
@@ -19,7 +19,7 @@ abstract class RepositoryModule {
     abstract fun bindMemoRepository(impl: LocalMemoRepository): MemoRepository
 
     @Binds @Singleton
-    abstract fun bindAsrEngine(impl: StubAsrEngine): AsrEngine
+    abstract fun bindAsrEngine(impl: XfyunAsrEngine): AsrEngine
 
     @Binds @Singleton
     abstract fun bindLlmClient(impl: OpenAiLlmClient): LlmClient

@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -19,6 +21,19 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Xfyun AppID from local.properties
+        val xfyunAppId = try {
+            val props = Properties()
+            val localProps = project.rootProject.file("local.properties")
+            if (localProps.exists()) {
+                localProps.inputStream().use { props.load(it) }
+            }
+            props.getProperty("xfyun.appid", "")
+        } catch (_: Exception) {
+            ""
+        }
+        buildConfigField("String", "XFYUN_APP_ID", "\"$xfyunAppId\"")
     }
 
     buildTypes {
@@ -39,6 +54,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -85,6 +101,12 @@ dependencies {
 
     // DataStore
     implementation(libs.androidx.datastore.preferences)
+
+    // Xfyun ASR SDK (place msc.jar in app/libs/)
+    val mscJar = file("libs/msc.jar")
+    if (mscJar.exists()) {
+        implementation(files(mscJar))
+    }
 
     // Testing
     testImplementation(libs.junit)
