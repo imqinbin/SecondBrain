@@ -12,6 +12,10 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
+    <queries>
+        <package android:name="com.autonavi.minimap" />
+    </queries>
+
     <application
         android:name=".SecondBrainApp"
         android:allowBackup="true"
@@ -43,6 +47,7 @@
         <service
             android:name=".service.VolumeKeyAccessibilityService"
             android:exported="true"
+            android:label="@string/accessibility_service_label"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
@@ -53,9 +58,5 @@
         </service>
 
     </application>
-
-    <queries>
-        <package android:name="com.autonavi.minimap" />
-    </queries>
 
 </manifest>
