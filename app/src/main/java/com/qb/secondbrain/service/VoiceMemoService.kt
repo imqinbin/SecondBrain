@@ -1,10 +1,14 @@
 package com.qb.secondbrain.service
 
+import android.Manifest
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.IBinder
+import android.widget.Toast
+import androidx.core.content.ContextCompat
 import com.qb.secondbrain.asr.AsrEngine
 import com.qb.secondbrain.context.LocationProvider
 import com.qb.secondbrain.context.ScreenCaptureProvider
@@ -46,34 +50,14 @@ class VoiceMemoService : Service() {
     private var currentState: VoiceMemoState = VoiceMemoState.Idle
 
     companion object {
-        const val ACTION_START_RECORDING = "com.qb.secondbrain.ACTION_START_RECORDING"
-        const val ACTION_STOP_RECORDING = "com.qb.secondbrain.ACTION_STOP_RECORDING"
         const val ACTION_TOGGLE_RECORDING = "com.qb.secondbrain.ACTION_TOGGLE_RECORDING"
         const val NOTIFICATION_ID = 1001
-
-        @JvmStatic
-        fun startRecording(context: Context) {
-            val intent = Intent(context, VoiceMemoService::class.java).apply {
-                action = ACTION_START_RECORDING
-            }
-            context.startForegroundService(intent)
-        }
-
-        @JvmStatic
-        fun stopRecording(context: Context) {
-            val intent = Intent(context, VoiceMemoService::class.java).apply {
-                action = ACTION_STOP_RECORDING
-            }
-            context.startService(intent)
-        }
     }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         when (intent?.action) {
-            ACTION_START_RECORDING -> handleStartRecording()
-            ACTION_STOP_RECORDING -> handleStopRecording()
             ACTION_TOGGLE_RECORDING -> {
                 if (currentState is VoiceMemoState.Recording) {
                     handleStopRecording()
@@ -93,6 +77,15 @@ class VoiceMemoService : Service() {
 
     private fun handleStartRecording() {
         if (currentState is VoiceMemoState.Recording) return
+
+        // Check RECORD_AUDIO permission before starting FGS with microphone type
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            handleError("请先授予录音权限")
+            Toast.makeText(this, "请先在设置中授予录音权限", Toast.LENGTH_LONG).show()
+            return
+        }
 
         currentState = VoiceMemoState.Recording
         val notification = notificationHelper.recordingNotification()
