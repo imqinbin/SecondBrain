@@ -22,18 +22,20 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // Xfyun AppID from local.properties
+        // Xfyun AIKit credentials from local.properties
         val xfyunAppId = try {
             val props = Properties()
             val localProps = project.rootProject.file("local.properties")
             if (localProps.exists()) {
                 localProps.inputStream().use { props.load(it) }
             }
-            props.getProperty("xfyun.appid", "")
+            props
         } catch (_: Exception) {
-            ""
+            Properties()
         }
-        buildConfigField("String", "XFYUN_APP_ID", "\"$xfyunAppId\"")
+        buildConfigField("String", "XFYUN_APP_ID", "\"${xfyunAppId.getProperty("xfyun.appid", "")}\"")
+        buildConfigField("String", "XFYUN_API_KEY", "\"${xfyunAppId.getProperty("xfyun.apiKey", "")}\"")
+        buildConfigField("String", "XFYUN_API_SECRET", "\"${xfyunAppId.getProperty("xfyun.apiSecret", "")}\"")
     }
 
     buildTypes {
@@ -102,11 +104,8 @@ dependencies {
     // DataStore
     implementation(libs.androidx.datastore.preferences)
 
-    // Xfyun ASR SDK (place msc.jar in app/libs/)
-    val mscJar = file("libs/msc.jar")
-    if (mscJar.exists()) {
-        implementation(files(mscJar))
-    }
+    // Xfyun AIKit SDK
+    implementation(files("libs/AIKit.aar"))
 
     // Testing
     testImplementation(libs.junit)
